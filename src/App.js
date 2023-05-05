@@ -1,3 +1,4 @@
+
 import React, {useState} from 'react';
 function Square({squarevalue, onsquareClick}) {
 
@@ -27,25 +28,62 @@ function calculateWinner(squares) {
 
 export default function Game() {
 
-  const [xIsNext, setXIsNext] = useState(true);
+  // const [xIsNext, setxIsNext] = useState(true);
+  
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length - 1];
+  const [currentMove, setCurrentMove] = useState(0);
+  const currentSquares = history[currentMove];
+  const xIsNext = currentMove % 2 === 0;
+
+  const moves = history.map((squares, move) => {
+    let description;
+    console.log(xIsNext)
+    if (move > 0) {
+      description = 'Go to move #' + move;
+    } else {
+      description = 'Go to game start';
+    }
+    return (
+      <li key = {move}>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
+    );
+    
+  });
+
 
   return(
     <div className="game">
       <div className="game-board">
-        <Board />
+        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
       </div>
       <div className="game-info">
-        <ol>{/*TODO*/}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   )
+
+  function jumpTo(nextMove) {
+    setCurrentMove(nextMove);
+    // setxIsNext(nextMove % 2 === 0);
+  }
+
+
+  
+  function handlePlay(nextSquares){
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+    setHistory([...history, nextSquares]);
+    console.log(nextSquares);
+    console.log(history);
+    // setxIsNext(!xIsNext)
+  }
 }
 
-function Board() {
-  const [squares,setsauqreValue] = useState(Array(9).fill(null));
-  const [xIsNext,setxIsNext] = useState(true);
+function Board({xIsNext,squares,onPlay}) {
+  // const [squares,setsauqreValue] = useState(Array(9).fill(null));
+  // const [xIsNext,setxIsNext] = useState(true);
 
 
   const winner = calculateWinner(squares);
@@ -57,18 +95,19 @@ function Board() {
   }
 
   function handleClick(i) {
-      const nextSquares = squares.slice();
+      
       if(squares[i] || calculateWinner(squares)){
         return;
       }
+      const nextSquares = squares.slice();
       if(xIsNext){
         nextSquares[i] = "X";
       }else{
         nextSquares[i] = "O";
       }
-      console.log("yes")
-      setsauqreValue(nextSquares);
-      setxIsNext(!xIsNext)
+      // console.log("yes")
+      
+      onPlay(nextSquares);
   }
 
   return (
